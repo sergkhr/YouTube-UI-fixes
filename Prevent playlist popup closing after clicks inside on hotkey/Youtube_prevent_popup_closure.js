@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Playlist Popup Protector (hotkey trigger)
 // @namespace    https://youtube.com/
-// @version      1.2
+// @version      1.3
 // @description  Prevent YouTube playlist popup from closing when clicking inside it, but close it on outside click
 // @author       You
 // @match        *://www.youtube.com/*
@@ -39,44 +39,31 @@
     
         console.log('🛡 Protecting playlist dropdown', dropdown);
     
-        let lastClickInside = false;
+        // Пометим, что защита уже активна, чтобы не навешивать повторно
+        if (dropdown.dataset.protected) return;
+        dropdown.dataset.protected = 'true';
     
-        // Определяем, был ли клик внутри окна
-        document.addEventListener('mousedown', (event) => {
-            lastClickInside = dropdown.contains(event.target);
+        // ✅ Блокируем клики внутри окна
+        dropdown.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            e.stopImmediatePropagation();
     
-            // Если клик вне — закрываем окно вручную
-            if (!lastClickInside && dropdown.style.display !== 'none') {
-                console.log('👋 Click outside — closing playlist popup');
+            // Если окно вдруг скрылось из-за фокуса — вернем
+            if (dropdown.style.display === 'none') {
+                console.log('🚫 Prevented YouTube from hiding playlist popup (click inside)');
+                dropdown.style.display = '';
+                dropdown.style.zIndex = '2202';
+            }
+        }, true);
+    
+        // ✅ Клик вне — вручную закрываем окно
+        document.addEventListener('mousedown', (e) => {
+            if (!dropdown.contains(e.target) && dropdown.style.display !== 'none') {
+                console.log('👋 Click outside — closing playlist popup manually');
                 dropdown.style.display = 'none';
                 dropdown.style.zIndex = '';
             }
         });
-    
-        // Следим за изменением атрибутов стиля
-        const observer = new MutationObserver((mutations) => {
-            for (const m of mutations) {
-                if (m.attributeName === 'style') {
-                    const display = dropdown.style.display;
-                    const z = dropdown.style.zIndex;
-    
-                    // YouTube пытается скрыть окно (но мы кликнули внутри)
-                    if (display === 'none' && lastClickInside) {
-                        console.log('🚫 Prevented YouTube from hiding playlist popup (click inside)');
-                        dropdown.style.display = '';
-                        dropdown.style.zIndex = '2202'; // восстановим z-index
-                        lastClickInside = false;
-                    }
-    
-                    // Если YouTube сбросил z-index, но окно всё ещё видно — восстанавливаем
-                    else if (z !== '2202' && display !== 'none') {
-                        dropdown.style.zIndex = '2202';
-                    }
-                }
-            }
-        });
-    
-        observer.observe(dropdown, { attributes: true, attributeFilter: ['style'] });
     
         console.log('✅ Protection active for playlist dropdown (manual close mode)');
     }
