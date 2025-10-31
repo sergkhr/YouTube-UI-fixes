@@ -13,6 +13,19 @@
 (function() {
     'use strict';
     
+    // создаём тег <style>
+    const style = document.createElement('style');
+    style.textContent = `
+        .my-ytd--playlist-popup-protector {
+            display: unset !important;
+            z-index: 2202 !important;
+        }
+    `;
+    document.head.appendChild(style);
+
+    console.log('🎨 Custom style for playlist popup added');
+
+
     /**
      * Ищем нужный tp-yt-iron-dropdown, который является родителем блока с role="list"
      */
@@ -43,27 +56,22 @@
         if (dropdown.dataset.protected) return;
         dropdown.dataset.protected = 'true';
     
-        // ✅ Блокируем клики внутри окна
+        // ✅ Клик внутри окна — включаем защиту (добавляем класс)
         dropdown.addEventListener('mousedown', (e) => {
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-    
-            // Если окно вдруг скрылось из-за фокуса — вернем
-            if (dropdown.style.display === 'none') {
-                console.log('🚫 Prevented YouTube from hiding playlist popup (click inside)');
-                dropdown.style.display = '';
-                dropdown.style.zIndex = '2202';
+            if (!dropdown.classList.contains('my-ytd--playlist-popup-protector')) {
+                dropdown.classList.add('my-ytd--playlist-popup-protector');
+                console.log('🟢 Protection class added to dropdown');
             }
         }, true);
-    
-        // ✅ Клик вне — вручную закрываем окно
+
+        // ✅ Клик вне окна — убираем защиту (удаляем класс)
         document.addEventListener('mousedown', (e) => {
-            if (!dropdown.contains(e.target) && dropdown.style.display !== 'none') {
-                console.log('👋 Click outside — closing playlist popup manually');
-                dropdown.style.display = 'none';
-                dropdown.style.zIndex = '';
+            if (!dropdown.contains(e.target) && dropdown.classList.contains('my-ytd--playlist-popup-protector')) {
+                dropdown.classList.remove('my-ytd--playlist-popup-protector');
+                console.log('🔴 Protection class removed from dropdown');
             }
         });
+
     
         console.log('✅ Protection active for playlist dropdown (manual close mode)');
     }
