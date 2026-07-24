@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Playlist Popup Protector (hotkey trigger)
 // @namespace    https://youtube.com/
-// @version      1.3
+// @version      1.4
 // @description  Prevent YouTube playlist popup from closing when clicking inside it, but close it on outside click
 // @author       You
 // @match        *://www.youtube.com/*
@@ -12,7 +12,7 @@
 
 (function() {
     'use strict';
-    
+
     // создаём тег <style>
     const style = document.createElement('style');
     style.textContent = `
@@ -27,10 +27,10 @@
 
 
     /**
-     * Ищем нужный tp-yt-iron-dropdown, который является родителем блока с role="list"
+     * Ищем нужный tp-yt-iron-dropdown, который является родителем блока с role="menu"
      */
     function findPlaylistDropdown() {
-        const lists = document.querySelectorAll('[role="list"]');
+        const lists = document.querySelectorAll('[role="menu"]');
         for (const list of lists) {
             const dropdown = list.closest('tp-yt-iron-dropdown');
             if (dropdown) {
@@ -39,7 +39,7 @@
         }
         return null;
     }
-    
+
     /**
      * Навешивает защиту на окно и управляет закрытием
      */
@@ -49,13 +49,13 @@
             console.warn('⚠️ Playlist dropdown not found');
             return;
         }
-    
+
         console.log('🛡 Protecting playlist dropdown', dropdown);
-    
+
         // Пометим, что защита уже активна, чтобы не навешивать повторно
         if (dropdown.dataset.protected) return;
         dropdown.dataset.protected = 'true';
-    
+
         // ✅ Клик внутри окна — включаем защиту (добавляем класс)
         dropdown.addEventListener('mousedown', (e) => {
             if (!dropdown.classList.contains('my-ytd--playlist-popup-protector')) {
@@ -72,10 +72,10 @@
             }
         });
 
-    
+
         console.log('✅ Protection active for playlist dropdown (manual close mode)');
     }
-    
+
     /**
      * Горячая клавиша — средняя кнопка мыши
      */
@@ -86,7 +86,6 @@
             protectPlaylistPopup();
         }
     });
-    
+
     console.log('🚀 Playlist Popup Protector (manual close version) loaded');
     })();
-    
