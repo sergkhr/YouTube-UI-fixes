@@ -6,8 +6,8 @@
 // @author       sergkhr
 // @homepageURL  https://github.com/sergkhr/YouTube-UI-fixes
 // @supportURL   https://github.com/sergkhr/YouTube-UI-fixes/issues
-// @updateURL    https://raw.githubusercontent.com/sergkhr/YouTube-UI-fixes/master/Sort%20on%20hotkey/Sort_on_hotkey.js
-// @downloadURL  https://raw.githubusercontent.com/sergkhr/YouTube-UI-fixes/master/Sort%20on%20hotkey/Sort_on_hotkey.js
+// @updateURL    https://raw.githubusercontent.com/sergkhr/YouTube-UI-fixes/master/Sort%20on%20hotkey/Youtube_sort_playlists_on_hotkey.js
+// @downloadURL  https://raw.githubusercontent.com/sergkhr/YouTube-UI-fixes/master/Sort%20on%20hotkey/Youtube_sort_playlists_on_hotkey.js
 // @match        *://www.youtube.com/*
 // @match        *://youtube.com/*
 // @run-at       document-end
