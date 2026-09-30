@@ -1,9 +1,13 @@
 // ==UserScript==
 // @name         YouTube Playlist Popup Protector (hotkey trigger)
-// @namespace    https://youtube.com/
-// @version      1.5
+// @namespace    https://github.com/sergkhr/YouTube-UI-fixes
+// @version      1.6
 // @description  Prevent YouTube playlist popups from closing when clicking inside them, but close them on outside click
-// @author       You
+// @author       sergkhr
+// @homepageURL  https://github.com/sergkhr/YouTube-UI-fixes
+// @supportURL   https://github.com/sergkhr/YouTube-UI-fixes/issues
+// @updateURL    https://raw.githubusercontent.com/sergkhr/YouTube-UI-fixes/master/Prevent%20playlist%20popup%20closing%20after%20clicks%20inside%20on%20hotkey/Playlist_popup_protector.js
+// @downloadURL  https://raw.githubusercontent.com/sergkhr/YouTube-UI-fixes/master/Prevent%20playlist%20popup%20closing%20after%20clicks%20inside%20on%20hotkey/Playlist_popup_protector.js
 // @match        *://www.youtube.com/*
 // @match        *://youtube.com/*
 // @run-at       document-end
@@ -15,7 +19,7 @@
 
     const PROTECTOR_CLASS = 'my-ytd--playlist-popup-protector';
 
-    // Создаём тег <style>
+    // Create the custom <style> element.
     const style = document.createElement('style');
 
     style.textContent = `
@@ -30,8 +34,8 @@
     console.log('🎨 Custom style for playlist popups added');
 
     /**
-     * Ищет все уникальные tp-yt-iron-dropdown,
-     * внутри которых есть элемент с role="menu".
+     * Finds all unique tp-yt-iron-dropdown elements
+     * that contain an element with role="menu".
      */
     function findPlaylistDropdowns() {
         const lists = [...document.querySelectorAll('[role="menu"]')];
@@ -40,46 +44,64 @@
             .map(list => list.closest('tp-yt-iron-dropdown'))
             .filter(dropdown => dropdown !== null);
 
-        // Убираем дубликаты:
-        // один dropdown может содержать несколько элементов role="menu".
+        // Remove duplicates because a single dropdown
+        // may contain multiple role="menu" elements.
         return [...new Set(dropdowns)];
     }
 
     /**
-     * Навешивает защиту на одно окно.
+     * Attaches popup protection to a single dropdown.
      */
     function protectDropdown(dropdown, index) {
         if (dropdown.dataset.playlistPopupProtected === 'true') {
-            console.log(`Dropdown ${index} already protected`, dropdown);
+            console.log(
+                `Dropdown ${index} already protected`,
+                dropdown
+            );
             return;
         }
 
         dropdown.dataset.playlistPopupProtected = 'true';
 
-        dropdown.addEventListener('mousedown', () => {
-            if (!dropdown.classList.contains(PROTECTOR_CLASS)) {
-                dropdown.classList.add(PROTECTOR_CLASS);
+        dropdown.addEventListener(
+            'mousedown',
+            () => {
+                if (
+                    !dropdown.classList.contains(PROTECTOR_CLASS)
+                ) {
+                    dropdown.classList.add(PROTECTOR_CLASS);
 
-                console.log(
-                    `🟢 Protection class added to dropdown ${index}`,
-                    dropdown
-                );
-            }
-        }, true);
+                    console.log(
+                        `🟢 Protection class added to dropdown ${index}`,
+                        dropdown
+                    );
+                }
+            },
+            true
+        );
 
-        console.log(`🛡 Protection attached to dropdown ${index}`, dropdown);
+        console.log(
+            `🛡 Protection attached to dropdown ${index}`,
+            dropdown
+        );
     }
 
     /**
-     * Ищет все подходящие окна и навешивает защиту на каждое.
+     * Finds all matching dropdowns
+     * and attaches protection to each one.
      */
     function protectPlaylistPopups() {
         const dropdowns = findPlaylistDropdowns();
 
-        console.log('Found playlist dropdowns:', dropdowns);
+        console.log(
+            'Found playlist dropdowns:',
+            dropdowns
+        );
 
         if (dropdowns.length === 0) {
-            console.warn('⚠️ Playlist dropdowns not found');
+            console.warn(
+                '⚠️ Playlist dropdowns not found'
+            );
             return;
         }
 
@@ -93,44 +115,52 @@
     }
 
     /**
-     * Один общий обработчик клика вне окон.
+     * Global handler for clicks outside protected dropdowns.
      *
-     * Удаляет защитный класс со всех защищённых dropdown,
-     * кроме того, внутри которого был сделан клик.
+     * Removes the protection class from every protected dropdown
+     * except the one containing the click target.
      */
-    document.addEventListener('mousedown', event => {
-        const protectedDropdowns = [
-            ...document.querySelectorAll(
-                `tp-yt-iron-dropdown.${PROTECTOR_CLASS}`
-            )
-        ];
+    document.addEventListener(
+        'mousedown',
+        event => {
+            const protectedDropdowns = [
+                ...document.querySelectorAll(
+                    `tp-yt-iron-dropdown.${PROTECTOR_CLASS}`
+                )
+            ];
 
-        protectedDropdowns.forEach(dropdown => {
-            if (!dropdown.contains(event.target)) {
-                dropdown.classList.remove(PROTECTOR_CLASS);
+            protectedDropdowns.forEach(dropdown => {
+                if (!dropdown.contains(event.target)) {
+                    dropdown.classList.remove(
+                        PROTECTOR_CLASS
+                    );
 
-                console.log(
-                    '🔴 Protection class removed from dropdown',
-                    dropdown
-                );
-            }
-        });
-    });
+                    console.log(
+                        '🔴 Protection class removed from dropdown',
+                        dropdown
+                    );
+                }
+            });
+        }
+    );
 
     /**
-     * Горячая клавиша — средняя кнопка мыши.
+     * Hotkey trigger: middle mouse button.
      */
-    document.addEventListener('mousedown', event => {
-        if (event.button === 1) {
-            event.preventDefault();
+    document.addEventListener(
+        'mousedown',
+        event => {
+            if (event.button === 1) {
+                event.preventDefault();
 
-            console.log(
-                '🖱 Middle click detected → enabling popup protection'
-            );
+                console.log(
+                    '🖱 Middle click detected → enabling popup protection'
+                );
 
-            protectPlaylistPopups();
+                protectPlaylistPopups();
+            }
         }
-    });
+    );
 
     console.log(
         '🚀 Playlist Popup Protector (multiple dropdown version) loaded'
