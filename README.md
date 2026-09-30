@@ -1,4 +1,4 @@
-# A bunch of scripts to work with youtube playlists on new UI
+# Different Tampermonkey scripts to try and fix my problems with YouTube's UI
 There is some amount of scripts for tampermonkey to try and solve solve problems with youtube's new UI
 
 ## Sorting playlists
