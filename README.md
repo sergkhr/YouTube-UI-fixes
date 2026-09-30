@@ -31,4 +31,4 @@ Default is MMB.
 ## Jam playlist panel returner
 I encountered a problem: list of tracks is no longer visible if it's a radio list (jam)
 
-This script 
+This script is automatically brings back the panel on radio playlists, and closes force-opened panels when they are not needed

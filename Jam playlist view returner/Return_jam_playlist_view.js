@@ -1,9 +1,13 @@
 // ==UserScript==
 // @name         YouTube Radio / Jam Playlist Panel Fix
-// @namespace    https://youtube.com/
-// @version      1.0
+// @namespace    https://github.com/sergkhr/YouTube-UI-fixes
+// @version      1.1
 // @description  Restores the playlist panel for YouTube Radio/Jam playlists and hides it again when leaving Radio.
-// @author       You
+// @author       sergkhr
+// @homepageURL  https://github.com/sergkhr/YouTube-UI-fixes
+// @supportURL   https://github.com/sergkhr/YouTube-UI-fixes/issues
+// @updateURL    https://raw.githubusercontent.com/sergkhr/YouTube-UI-fixes/master/Jam%20playlist%20view%20returner/Return_jam_playlist_view.js
+// @downloadURL  https://raw.githubusercontent.com/sergkhr/YouTube-UI-fixes/master/Jam%20playlist%20view%20returner/Return_jam_playlist_view.js
 // @match        *://www.youtube.com/*
 // @match        *://youtube.com/*
 // @run-at       document-start
@@ -19,17 +23,17 @@
     let currentPanel = null;
     let panelObserver = null;
 
-    // Дополнительно запоминаем состояние отдельно от DOM.
-    // Это нужно на случай, если YouTube заменит сам элемент панели
-    // во время перехода со страницы Radio.
+    // Keep the forced-open state separately from the DOM.
+    // This is needed in case YouTube replaces the panel element
+    // while navigating away from a Radio page.
     let forcedOpenByScript = false;
 
     /**
-     * Определяет текущее состояние страницы:
+     * Determines the current playlist state:
      *
      * radio    — YouTube Radio / Mix / Jam
-     * playlist — обычный плейлист
-     * none     — плейлиста нет
+     * playlist — regular playlist
+     * none     — no playlist
      */
     function getPlaylistState() {
         const url = new URL(location.href);
@@ -52,8 +56,8 @@
     }
 
     /**
-     * Помечает панель как открытую нашим скриптом
-     * и снимает hidden.
+     * Marks the panel as opened by this script
+     * and removes the hidden attribute.
      */
     function forceOpenPanel(panel) {
         forcedOpenByScript = true;
@@ -70,7 +74,7 @@
     }
 
     /**
-     * Закрывает панель, но только если ранее её открыл наш скрипт.
+     * Hides the panel only if it was previously opened by this script.
      */
     function closeForcedPanel(panel) {
         const markedByScript =
@@ -91,10 +95,10 @@
     }
 
     /**
-     * Начинает отдельно следить за конкретной панелью.
+     * Observes the current playlist panel directly.
      *
-     * Это нужно потому, что YouTube может повторно поставить
-     * hidden уже после того, как мы его сняли.
+     * This is necessary because YouTube may add the hidden
+     * attribute again after this script has removed it.
      */
     function observePanel(panel) {
         if (panel === currentPanel) {
@@ -124,7 +128,7 @@
     }
 
     /**
-     * Основная логика.
+     * Applies the correct panel behavior for the current page state.
      */
     function updatePlaylistPanel() {
         const state = getPlaylistState();
@@ -139,16 +143,16 @@
         switch (state) {
             case 'radio':
                 // Radio / Jam:
-                // принудительно показываем панель.
+                // force the playlist panel to remain visible.
                 forceOpenPanel(panel);
                 break;
 
             case 'playlist':
                 /*
-                 * Обычный плейлист:
+                 * Regular playlist:
                  *
-                 * управление полностью возвращаем YouTube.
-                 * hidden здесь намеренно не меняем.
+                 * return full control to YouTube.
+                 * Do not modify the hidden attribute here.
                  */
                 panel.removeAttribute(MARKER_ATTRIBUTE);
                 forcedOpenByScript = false;
@@ -156,10 +160,9 @@
 
             case 'none':
                 /*
-                 * Плейлиста нет:
+                 * No playlist:
                  *
-                 * закрываем панель только в том случае,
-                 * если она была раскрыта нашим скриптом.
+                 * hide the panel only if this script opened it.
                  */
                 closeForcedPanel(panel);
                 break;
@@ -167,8 +170,8 @@
     }
 
     /**
-     * Небольшая защита от десятков вызовов updatePlaylistPanel()
-     * подряд при массовых изменениях DOM.
+     * Prevents many updatePlaylistPanel() calls from running
+     * consecutively during large DOM updates.
      */
     let updateScheduled = false;
 
@@ -186,25 +189,23 @@
     }
 
     /**
-     * Основное событие SPA-навигации YouTube.
+     * Main YouTube SPA navigation event.
      */
     document.addEventListener('yt-navigate-finish', () => {
         scheduleUpdate();
     });
 
     /**
-     * YouTube может создать ytd-playlist-panel-renderer
-     * уже после завершения навигации.
+     * YouTube may create ytd-playlist-panel-renderer
+     * after navigation has already finished.
      *
-     * Поэтому следим также за изменениями DOM.
+     * Observe DOM changes as a fallback.
      */
     const pageObserver = new MutationObserver(() => {
         /*
-         * На обычной странице без нашего Radio вмешиваться
-         * практически незачем.
-         *
-         * Но update всё равно безопасен: для обычного плейлиста
-         * он ничего с hidden не делает.
+         * Running the update on regular pages is safe:
+         * the script does not modify the hidden state
+         * of regular playlist panels.
          */
         scheduleUpdate();
     });
